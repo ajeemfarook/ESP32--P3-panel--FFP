@@ -1,21 +1,41 @@
-Fourier Ptychography LED Illuminator
-ESP32 firmware for controlling 64x64 HUB75 LED matrices in computational microscopy applications. Generates precise illumination patterns (brightfield, darkfield, phase contrast) for Fourier Ptychography via serial commands with virtual grid scaling.
+# Fourier Ptychography LED Illuminator
 
-Quick Start
-Hardware Requirements
-ESP32 development board (ESP32-WROOM-32 recommended)
+ESP32 firmware for controlling **64×64 HUB75 LED matrices** in computational microscopy applications. This project generates precise illumination patterns—**brightfield, darkfield, and phase contrast**—for **Fourier Ptychography** via a simple serial command interface with **virtual grid scaling**.
 
-64x64 HUB75 LED matrix (P3 or P4 pitch)
+---
 
-5V/10A power supply for LED matrix
+## ✨ Features
 
-USB cable for ESP32 programming/power
+* **Virtual Grid Scaling**: 8×8, 16×16, 32×32, 64×64 coordinate mapping
+* **Pattern Library**:
 
-Connecting wires (20+ jumper wires)
+  * Brightfield
+  * Darkfield
+  * Phase contrast (top / bottom / left / right)
+* **Color Control**: RGB with 0–100% brightness per LED
+* **Simple Serial Protocol**: Human‑readable text commands with error feedback
+* **Real‑time Control**: <10 ms response for pattern updates
+* **Designed for Computational Microscopy & Fourier Ptychography**
 
-Critical Connections for HUB75E
-text
-HUB75E Pinout → ESP32 GPIO
+---
+
+## 🧰 Hardware Requirements
+
+* ESP32 development board (**ESP32‑WROOM‑32 recommended**)
+* 64×64 HUB75 LED matrix (P3 or P4 pitch)
+* 5V / 10A power supply (for LED matrix)
+* USB cable (ESP32 programming & power)
+* Jumper wires (≈20+)
+
+---
+
+## 🔌 HUB75E Critical Connections (64×64 Panels)
+
+> ⚠️ **IMPORTANT:** 64×64 HUB75 panels **require the E address line**. Without it, only half the panel will display.
+
+### HUB75E → ESP32 GPIO Mapping
+
+```
 ┌─────────┬─────────┐
 │ R1 (25) │ G1 (26) │
 ├─────────┼─────────┤
@@ -23,7 +43,7 @@ HUB75E Pinout → ESP32 GPIO
 ├─────────┼─────────┤
 │ R2 (14) │ G2 (12) │
 ├─────────┼─────────┤
-│ B2 (13) │   E (32)│  ← MUST CONNECT for 64x64!
+│ B2 (13) │   E (32)│  ← MUST CONNECT for 64×64
 ├─────────┼─────────┤
 │  A (23) │  B (19) │
 ├─────────┼─────────┤
@@ -33,104 +53,165 @@ HUB75E Pinout → ESP32 GPIO
 ├─────────┼─────────┤
 │ OE (15) │  GND    │
 └─────────┴─────────┘
+```
 
-COMMON GND: Connect ESP32 GND to matrix GND
-Power Setup
-LED Matrix: Dedicated 5V 10A power supply to matrix
+* **COMMON GND:** Connect ESP32 GND to LED matrix GND
 
-ESP32: USB power (3.3V) - keep SEPARATE from matrix power
+---
 
-Ground: Connect ESP32 GND to matrix GND for signal reference
+## ⚡ Power Setup
 
-Software Installation
-Install ESP32 board support in Arduino IDE:
+* **LED Matrix:**
 
-File → Preferences → Additional Boards Manager URLs:
+  * Dedicated **5V / 10A** power supply
+* **ESP32:**
 
-text
+  * Powered via USB (3.3V logic)
+* **Grounding:**
+
+  * ESP32 GND **must** be connected to matrix GND for proper signal reference
+
+> 🔒 Do **NOT** power the LED matrix from the ESP32.
+
+---
+
+## 💻 Software Installation
+
+### 1. Install ESP32 Board Support (Arduino IDE)
+
+**File → Preferences → Additional Boards Manager URLs**
+
+```
 https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
-Tools → Board → Boards Manager → Search "esp32" → Install
+```
 
-Install Required Libraries (Tools → Manage Libraries):
+**Tools → Board → Boards Manager** → Search **esp32** → Install
 
-ESP32-HUB75-MatrixPanel-I2S-DMA by Marc Merlin
+---
 
-Adafruit GFX Library (usually auto-installs)
+### 2. Install Required Libraries
 
-Project Structure: Place all 6 files in a folder named led_blink:
+**Tools → Manage Libraries**
 
-led_blink.ino (main sketch)
+* **ESP32-HUB75-MatrixPanel-I2S-DMA** (by Marc Merlin)
+* **Adafruit GFX Library** (auto-installed dependency)
 
-comms.h, comms.cpp
+---
 
-drawing.h, drawing.cpp
+## 📁 Project Structure
 
-panel_config.h
+Place all files inside a folder named **`led_blink`**:
 
-Board Configuration:
+```
+led_blink/
+├── led_blink.ino        # Main sketch
+├── comms.h
+├── comms.cpp
+├── drawing.h
+├── drawing.cpp
+├── panel_config.h
+```
 
-Board: ESP32 Dev Module
+---
 
-Upload Speed: 921600
+## ⚙️ Arduino Board Configuration
 
-Flash Mode: QIO
+* **Board:** ESP32 Dev Module
+* **Upload Speed:** 921600
+* **Flash Mode:** QIO
+* **Partition Scheme:** Default 4MB with spiffs
+* **Port:** Select your ESP32 COM port
 
-Partition Scheme: Default 4MB with spiffs
+---
 
-Port: Select your ESP32 COM port
+## ▶️ Quick Start
 
-Basic Usage (Serial Monitor, 115200 baud)
-text
-grid 8                    # Set 8x8 virtual grid (0-7 coordinates)
-draw 4 4 100 R           # Red pixel at center (maps to 32,32 on 64x64)
-brightfield 4 4 2 100 G  # Green circle, radius 2 in 8x8 grid
+1. Connect hardware as per wiring table
+2. Upload firmware to ESP32
+3. Open **Serial Monitor**
+
+   * Baud rate: **115200**
+   * Line ending: **Newline**
+
+---
+
+## 🧪 Basic Serial Commands
+
+```
+grid 8                    # Set 8×8 virtual grid (0–7 coordinates)
+draw 4 4 100 R           # Red LED at grid center (maps to 32,32)
+brightfield 4 4 2 100 G  # Green brightfield circle, radius 2
 clear                    # Turn off all LEDs
 help                     # Show command reference
-Complete Wiring Example
-cpp
+```
+
+---
+
+## 🔧 Complete Wiring Example (Code Reference)
+
+```cpp
 // ESP32 GPIO → HUB75E Pin Mapping
-// Using default library pins for 64x64
-const int R1_PIN = 25;
-const int G1_PIN = 26;
-const int B1_PIN = 27;
-const int R2_PIN = 14;
-const int G2_PIN = 12;
-const int B2_PIN = 13;
-const int A_PIN = 23;
-const int B_PIN = 19;
-const int C_PIN = 5;
-const int D_PIN = 17;
-const int E_PIN = 32;  // CRITICAL for 64x64!
+const int R1_PIN  = 25;
+const int G1_PIN  = 26;
+const int B1_PIN  = 27;
+const int R2_PIN  = 14;
+const int G2_PIN  = 12;
+const int B2_PIN  = 13;
+
+const int A_PIN   = 23;
+const int B_PIN   = 19;
+const int C_PIN   = 5;
+const int D_PIN   = 17;
+const int E_PIN   = 32;   // REQUIRED for 64×64 panels
+
 const int CLK_PIN = 16;
 const int LAT_PIN = 4;
-const int OE_PIN = 15;
-Features
-Virtual Grid Scaling: 8x8, 16x16, 32x32, 64x64 coordinate mapping
+const int OE_PIN  = 15;
+```
 
-Pattern Library: Brightfield, darkfield, phase contrast (top/bottom/left/right)
+---
 
-Color Control: RGB with 0-100% brightness per LED
+## 🧠 Applications
 
-Simple Serial Protocol: Text commands with error feedback
+* Fourier Ptychography calibration
+* Computational microscopy illumination
+* Optical system testing
+* Adaptive illumination experiments
+* Educational demonstrations
 
-Real-time Control: <10ms response for pattern changes
+---
 
-Troubleshooting
-Half panel displays: Check E pin (GPIO 32) connection
+## 🛠 Troubleshooting
 
-No display: Verify 5V 10A power to matrix
+| Issue                 | Possible Cause              | Solution                  |
+| --------------------- | --------------------------- | ------------------------- |
+| Half panel displays   | E pin not connected         | Connect GPIO 32 to HUB75E |
+| No display            | Insufficient power          | Use dedicated 5V 10A PSU  |
+| Wrong colors          | RGB pin mismatch            | Verify R/G/B wiring       |
+| Serial not responding | Baud / line ending mismatch | 115200 baud, Newline      |
 
-Wrong colors: Check RGB pin assignments
+---
 
-Serial not responding: Confirm 115200 baud, Newline ending
+## ⚠️ Important Notes
 
-Applications
-Fourier Ptychography calibration
+* **64×64 HUB75 panels REQUIRE the E address line**
+* Without E connected, only **32 rows** will refresh
+* Always share **common ground** between ESP32 and matrix
 
-Computational microscopy illumination
+---
 
-Optical system testing
+## 📜 License
 
-Educational demonstrations
+MIT License (or specify your preferred license)
 
-Note: 64x64 panels REQUIRE the E address line (GPIO 32). Without it, only 32 rows will display.
+---
+
+## 🙌 Acknowledgements
+
+* Marc Merlin – ESP32 HUB75 I2S DMA driver
+* Fourier Ptychography research community
+* Open-source microscopy developers
+
+---
+
+Happy hacking & clear illumination 🔬✨
