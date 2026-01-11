@@ -1,6 +1,6 @@
 # Fourier Ptychography LED Illuminator
 
-ESP32 firmware for controlling **64×64 HUB75 LED matrices** in computational microscopy applications. This project generates precise illumination patterns—**brightfield, darkfield, and phase contrast**—for **Fourier Ptychography** via a simple serial command interface with **virtual grid scaling**.
+ESP32 firmware for controlling **64×64 HUB75 LED matrices** in computational microscopy applications. This project generates precise illumination patterns (**brightfield, darkfield, and phase contrast**) for **Fourier Ptychography** via a simple serial command interface with **virtual grid scaling**.
 
 ---
 
